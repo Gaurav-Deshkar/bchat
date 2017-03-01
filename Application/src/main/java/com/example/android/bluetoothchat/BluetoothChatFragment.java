@@ -4,7 +4,9 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,8 +35,6 @@ import com.example.android.common.logger.Log;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 
 /**
@@ -46,24 +46,23 @@ public class BluetoothChatFragment extends Fragment {
     private static final String REPEAT_CODE = "17";
 
 
-
     private static final String TAG = "BluetoothChatFragment";
-    static Map<String,String> phraseMap = new HashMap<String, String>(){{
-        put("01","Can I use your washroom?");
-        put("03","Which place is this?");
-        put("06","Switch off the light please");
-        put("08","Can you help me?");
-        put("09","I am hungry");
-        put("0B","Wait for some time");
-        put("0C","We are queens");
-        put("0D","Pardon");
-        put("0F","Thank you");
-        put("10","My work is completed");
-        put("11","I am not feeling well. Please call the doctor");
-        put("1F","May I ask a question?");
-        put("0E","Hello, Good morning");
-        put("19","Have a nice day");
-        put("18","Our project name is An approach to glove based gesture recognition and voice conversation system for impair patient");
+    static Map<String, String> phraseMap = new HashMap<String, String>() {{
+        put("01", "Can I use your washroom?");
+        put("03", "Which place is this?");
+        put("06", "Switch off the light please");
+        put("08", "Can you help me?");
+        put("09", "I am hungry");
+        put("0B", "Wait for some time");
+        put("0C", "We are queens");
+        put("0D", "Pardon");
+        put("0F", "Thank you");
+        put("10", "My work is completed");
+        put("11", "I am not feeling well. Please call the doctor");
+        put("1F", "May I ask a question?");
+        put("0E", "Hello, Good morning");
+        put("19", "Have a nice day");
+        put("18", "Our project name is An approach to glove based gesture recognition and voice conversation system for impair patient");
     }};
 
 
@@ -73,9 +72,9 @@ public class BluetoothChatFragment extends Fragment {
     private static final int REQUEST_ENABLE_BT = 3;
 
     // Layout Views
-    private ListView mConversationView;
-    private EditText mOutEditText;
-    private Button mSendButton;
+//    private ListView mConversationView;
+    private TextView lastMessage;
+//    private Button mSendButton;
     private TextToSpeech textToSpeech;
 
     /**
@@ -86,7 +85,7 @@ public class BluetoothChatFragment extends Fragment {
     /**
      * Array adapter for the conversation thread
      */
-    private ArrayAdapter<String> mConversationArrayAdapter;
+//    private ArrayAdapter<String> mConversationArrayAdapter;
 
     /**
      * String buffer for outgoing messages
@@ -103,16 +102,20 @@ public class BluetoothChatFragment extends Fragment {
      */
     private BluetoothChatService mChatService = null;
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         // Get local Bluetooth adapter
+        FragmentActivity activity = getActivity();
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
+        SharedPreferences preferences = activity.getPreferences(Context.MODE_PRIVATE);
+        String userName = preferences.getString(getString(R.string.saved_user_name), "");
+        phraseMap.put("0C", "My Name Is " + userName);
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {
-            FragmentActivity activity = getActivity();
+
             Toast.makeText(activity, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             activity.finish();
         }
@@ -145,7 +148,8 @@ public class BluetoothChatFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         if (mChatService != null) {
-            mChatService.stop();
+            mChatService.destroy();
+            mChatService = null;
         }
     }
 
@@ -173,9 +177,9 @@ public class BluetoothChatFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        mConversationView = (ListView) view.findViewById(R.id.in);
-        mOutEditText = (EditText) view.findViewById(R.id.edit_text_out);
-        mSendButton = (Button) view.findViewById(R.id.button_send);
+        lastMessage = (TextView) view.findViewById(R.id.lastMessage);
+//        mOutEditText = (EditText) view.findViewById(R.id.edit_text_out);
+//        mSendButton = (Button) view.findViewById(R.id.button_send);
     }
 
     /**
@@ -185,25 +189,25 @@ public class BluetoothChatFragment extends Fragment {
         Log.d(TAG, "setupChat()");
 
         // Initialize the array adapter for the conversation thread
-        mConversationArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.message);
+//        mConversationArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.message);
 
-        mConversationView.setAdapter(mConversationArrayAdapter);
+//        mConversationView.setAdapter(mConversationArrayAdapter);
 
         // Initialize the compose field with a listener for the return key
-        mOutEditText.setOnEditorActionListener(mWriteListener);
+//        mOutEditText.setOnEditorActionListener(mWriteListener);
 
         // Initialize the send button with a listener that for click events
-        mSendButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Send a message using content of the edit text widget
-                View view = getView();
-                if (null != view) {
-                    TextView textView = (TextView) view.findViewById(R.id.edit_text_out);
-                    String message = textView.getText().toString();
-                    sendMessage(message);
-                }
-            }
-        });
+//        mSendButton.setOnClickListener(new View.OnClickListener() {
+////            public void onClick(View v) {
+//                // Send a message using content of the edit text widget
+//                View view = getView();
+//                if (null != view) {
+//                    TextView textView = (TextView) view.findViewById(R.id.edit_text_out);
+//                    String message = textView.getText().toString();
+//                    sendMessage(message);
+//                }
+//            }
+//        });
 
         // Initialize the BluetoothChatService to perform bluetooth connections
         mChatService = new BluetoothChatService(getActivity(), mHandler);
@@ -244,7 +248,7 @@ public class BluetoothChatFragment extends Fragment {
 
             // Reset out string buffer to zero and clear the edit text field
             mOutStringBuffer.setLength(0);
-            mOutEditText.setText(mOutStringBuffer);
+//            mOutEditText.setText(mOutStringBuffer);
         }
     }
 
@@ -309,7 +313,7 @@ public class BluetoothChatFragment extends Fragment {
                     switch (msg.arg1) {
                         case BluetoothChatService.STATE_CONNECTED:
                             setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
-                            mConversationArrayAdapter.clear();
+//                            mConversationArrayAdapter.clear();
                             break;
                         case BluetoothChatService.STATE_CONNECTING:
                             setStatus(R.string.title_connecting);
@@ -324,24 +328,25 @@ public class BluetoothChatFragment extends Fragment {
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
-                    mConversationArrayAdapter.add("Me:  " + writeMessage);
+//                    mConversationArrayAdapter.add("Me:  " + writeMessage);
                     break;
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String codeReceived = new String(readBuf, 0, msg.arg1);
-                    if (codeReceived.equals(REPEAT_CODE)){
+                    if (codeReceived.equals(REPEAT_CODE)) {
                         codeReceived = lastPhrase;
                     }
-                    if (phraseMap.containsKey(codeReceived)){
+                    if (phraseMap.containsKey(codeReceived)) {
                         lastPhrase = codeReceived;
                     }
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                         textToSpeech.speak(phraseMap.get(codeReceived), TextToSpeech.QUEUE_FLUSH, null);
-                    }else {
+                    } else {
                         textToSpeech.speak(phraseMap.get(codeReceived), TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
                     }
-                    mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + codeReceived);
+                    lastMessage.setText(phraseMap.get(codeReceived));
+//                    mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + codeReceived);
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name

@@ -17,22 +17,21 @@
 
 package com.example.android.bluetoothchat;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.ViewAnimator;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.example.android.common.activities.SampleActivityBase;
-import com.example.android.common.logger.Log;
-import com.example.android.common.logger.LogFragment;
-import com.example.android.common.logger.LogWrapper;
-import com.example.android.common.logger.MessageOnlyLogFilter;
 
 /**
  * A simple launcher activity containing a summary sample description, sample log and a custom
  * {@link android.support.v4.app.Fragment} which can display a view.
- * <p>
+ * <p/>
  * For devices with displays with a width of 720dp or greater, the sample log is always visible,
  * on other devices it's visibility is controlled by an item on the Action Bar.
  */
@@ -41,14 +40,52 @@ public class MainActivity extends SampleActivityBase {
     public static final String TAG = "MainActivity";
 
     // Whether the Log Fragment is currently shown
-    private boolean mLogShown;
+    EditText userNameEditText;
+    Button continueButton;
+    View fragmentView;
+    View userView;
+    SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
 
-        if (savedInstanceState == null) {
+        fragmentView = findViewById(R.id.sample_content_fragment);
+        userView = findViewById(R.id.user_view);
+
+        if (hasUser()) {
+            showChatFragment();
+            return;
+        }
+        userNameEditText = (EditText) findViewById(R.id.user_name);
+        continueButton = (Button) findViewById(R.id.btn_continue);
+        continueButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveUser();
+                showChatFragment();
+            }
+        });
+    }
+
+    private void saveUser() {
+        String userName = userNameEditText.getText().toString();
+        if (userName != null || !userName.trim().isEmpty()) {
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(getString(R.string.saved_user_name), userName);
+            editor.commit();
+        }
+
+    }
+
+
+    private void showChatFragment() {
+
+        if (hasUser()) {
+            userView.setVisibility(View.GONE);
+            fragmentView.setVisibility(View.VISIBLE);
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             BluetoothChatFragment fragment = new BluetoothChatFragment();
             transaction.replace(R.id.sample_content_fragment, fragment);
@@ -56,20 +93,13 @@ public class MainActivity extends SampleActivityBase {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+    @NonNull
+    private boolean hasUser() {
+        String userName = sharedPref.getString(getString(R.string.saved_user_name), "");
+
+        return !userName.isEmpty();
     }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem logToggle = menu.findItem(R.id.menu_toggle_log);
-        logToggle.setVisible(findViewById(R.id.sample_output) instanceof ViewAnimator);
-        logToggle.setTitle(mLogShown ? R.string.sample_hide_log : R.string.sample_show_log);
-
-        return super.onPrepareOptionsMenu(menu);
-    }
 
     /** Create a chain of targets that will receive log data */
 }
