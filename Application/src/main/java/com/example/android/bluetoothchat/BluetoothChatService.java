@@ -30,6 +30,8 @@ import com.example.android.common.logger.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 /**
@@ -462,13 +464,23 @@ public class BluetoothChatService {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
+        private static final long INTEVAL_PERIOD = 5000;
+
+        private  Timer timer;
 
         public ConnectedThread(BluetoothSocket socket, String socketType) {
             Log.d(TAG, "create ConnectedThread: " + socketType);
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
-
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                    write("keepAlive".getBytes());
+                }
+            };
+            timer = new Timer();
+            timer.scheduleAtFixedRate(task,0,INTEVAL_PERIOD);
             // Get the BluetoothSocket input and output streams
             try {
                 tmpIn = socket.getInputStream();
@@ -523,6 +535,8 @@ public class BluetoothChatService {
 
         public void cancel() {
             try {
+                timer.cancel();
+                timer.purge();
                 mmSocket.close();
             } catch (IOException e) {
                 Log.e(TAG, "close() of connect socket failed", e);
