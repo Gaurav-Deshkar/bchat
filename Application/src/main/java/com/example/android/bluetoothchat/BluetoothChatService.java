@@ -30,6 +30,7 @@ import com.example.android.common.logger.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -421,10 +422,14 @@ public class BluetoothChatService {
                     tmp = device.createRfcommSocketToServiceRecord(
                             MY_UUID_SECURE);
                 } else {
-                    tmp = device.createInsecureRfcommSocketToServiceRecord(
-                            MY_UUID_INSECURE);
+                    Method method;
+
+
+                    method = device.getClass().getMethod("createRfcommSocket", new Class[] { int.class } );
+
+                    tmp = (BluetoothSocket) method.invoke(device, 1);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Socket Type: " + mSocketType + "create() failed", e);
             }
             mmSocket = tmp;
