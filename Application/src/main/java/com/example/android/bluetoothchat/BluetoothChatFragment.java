@@ -340,9 +340,9 @@ public class BluetoothChatFragment extends Fragment {
                         lastPhrase = codeReceived;
                     }
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                        textToSpeech.speak(phraseMap.get(codeReceived), TextToSpeech.QUEUE_FLUSH, null);
+                        textToSpeech.speak(phraseMap.get(codeReceived), TextToSpeech.QUEUE_ADD, null);
                     } else {
-                        textToSpeech.speak(phraseMap.get(codeReceived), TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
+                        textToSpeech.speak(phraseMap.get(codeReceived), TextToSpeech.QUEUE_ADD, null, UUID.randomUUID().toString());
                     }
                     lastMessage.setText(phraseMap.get(codeReceived));
 //                    mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + codeReceived);

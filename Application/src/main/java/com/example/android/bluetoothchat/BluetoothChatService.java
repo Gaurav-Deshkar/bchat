@@ -526,15 +526,15 @@ public class BluetoothChatService {
                 try {
                     // Read from the InputStream
                     int available = mmInStream.available();
+
                     if(available %2==0 && available >0){
-                    bytes = mmInStream.read(buffer,0,2);
-
-
-                    // Send the obtained bytes to the UI Activity
-                    if (mHandler != null) {
-                        mHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer)
-                                .sendToTarget();
-                    }}
+                        bytes = mmInStream.read(buffer,0,2);
+                        // Send the obtained bytes to the UI Activity
+                        if (mHandler != null) {
+                            mHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer)
+                                    .sendToTarget();
+                        }
+                    }
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
