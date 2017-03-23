@@ -54,7 +54,6 @@ public class BluetoothChatFragment extends Fragment {
         put("08", "Can you help me?");
         put("09", "I am hungry");
         put("0B", "Wait for some time");
-        put("0C", "We are queens");
         put("0D", "Pardon");
         put("0F", "Thank you");
         put("10", "My work is completed");

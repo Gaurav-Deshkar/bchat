@@ -525,8 +525,9 @@ public class BluetoothChatService {
             while (mState == STATE_CONNECTED) {
                 try {
                     // Read from the InputStream
-                    if(mmInStream.available()>0){
-                    bytes = mmInStream.read(buffer);
+                    int available = mmInStream.available();
+                    if(available %2==0 && available >0){
+                    bytes = mmInStream.read(buffer,0,2);
 
 
                     // Send the obtained bytes to the UI Activity
