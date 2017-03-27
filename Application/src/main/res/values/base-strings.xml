@@ -16,20 +16,18 @@
 -->
 
 <resources>
-    <string name="app_name">BluetoothChat</string>
+    <string name="app_name">SpeakingGloves</string>
     <string name="intro_message">
         <![CDATA[
         
-            
-            This application allows two Android devices to carry out two-way text chat over
-            Bluetooth. It demonstrates all the fundamental Bluetooth API capabilites, such as:
+            This application allows an Android device to receive text over
+            Bluetooth chat. It does following operations:
               (1) Scanning for other Bluetooth devices
               (2) Querying the local Bluetooth adapter for paired Bluetooth devices
-              (3) Establishing RFCOMM channels/sockets
-              (4) Connecting to a remote device
-              (5) Transfering data over Bluetooth
-            
-        
+              (3) Connecting to a remote device
+              (4) Transferring data over Bluetooth to any Bluetooth device (including BT modules for Arduino and etc)
+              (5) On receiving text, it convert text to corresponding speech.
+
         ]]>
     </string>
 </resources>
